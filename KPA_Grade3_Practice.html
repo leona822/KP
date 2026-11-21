@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#142e26">
-<title>KPA 지도자 3급 모의시험_made by Leona</title>
+<title>KPA 지도자 3급 모의시험</title>
 <style>
 :root{color-scheme:light;--ink:#152c23;--muted:#506256;--dark:#142e26;--green:#23634c;--lime:#def487;--paper:#f5f7f2;--line:#dbe3d9;--white:#fff;--soft:#e9f2e7;--red:#a33831;--redbg:#fff0ed;--round:16px}
 *{box-sizing:border-box}
@@ -104,10 +104,10 @@ dialog .actions{justify-content:flex-end}
 @media print{header,.study-tools,footer{display:none}main.wrap{width:100%;margin:0;padding:0}.study{border:0;padding:0;margin:12px 0}.study h2,.study h3{break-after:avoid}.study tr,.study p{break-inside:avoid}body{background:white;font-size:10pt}.study table{font-size:9pt}.study h2{font-size:15pt}}
 .topic-list{padding-inline-start:1.25em}.topic-list li{margin:.55em 0;line-height:1.65}@media print{.topic-list li{break-inside:avoid}}
 .study-fig{margin:16px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fafcf8;break-inside:avoid}.study-fig svg{width:100%;max-width:540px;height:auto;display:block;margin:auto;fill:var(--ink);font-family:inherit}.study-fig figcaption{margin:8px auto 0;max-width:64ch;font-size:15px;color:var(--muted)}@media print{.study-fig svg{max-width:350px}.study-fig figcaption{font-size:9pt}}
-.serve-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.serve-grid figure{margin:0;padding:12px;border:1px solid var(--line);border-radius:8px;break-inside:avoid}.serve-grid svg{width:100%;height:auto}.serve-grid text{text-anchor:middle;font:600 16px system-ui;fill:var(--ink)}.serve-grid p{margin:4px 0}.serve-grid strong{white-space:nowrap;color:var(--green)}@media print{.serve-grid{grid-template-columns:1fr 1fr}.serve-grid svg{max-height:95px}}</style>
+.serve-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.serve-grid figure{margin:0;padding:12px;border:1px solid var(--line);border-radius:8px;break-inside:avoid}.serve-grid svg{width:100%;height:auto}.serve-grid text{text-anchor:middle;font:600 16px system-ui;fill:var(--ink)}.serve-grid p{margin:4px 0}.serve-grid strong{white-space:nowrap;color:var(--green)}@media print{.serve-grid{grid-template-columns:1fr 1fr}.serve-grid svg{max-height:95px}}.choice:disabled{opacity:1}.answer-check{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}.answer-check span,.answer-feedback small{font-size:14px;color:var(--muted)}.answer-feedback{margin-top:16px;padding:16px;background:var(--soft);border-radius:8px}.answer-feedback p{margin:6px 0}</style>
 </head>
 <body>
-<header><div class="wrap top"><button class="brand" data-act="home"><span class="brand-mark" aria-hidden="true">KPA</span>지도자 3급 모의시험_made by Leona</button><nav class="nav" aria-label="주 메뉴"><button id="nav-home" data-act="home">모의시험</button><button id="nav-notes" data-act="notes">오답노트 <span id="note-count"></span></button></nav></div></header>
+<header><div class="wrap top"><button class="brand" data-act="home"><span class="brand-mark" aria-hidden="true">KPA</span>지도자 3급 모의시험</button><nav class="nav" aria-label="주 메뉴"><button id="nav-home" data-act="home">모의시험</button><button id="nav-notes" data-act="notes">오답노트 <span id="note-count"></span></button></nav></div></header>
 <main id="app" class="wrap"></main>
 <footer><div class="wrap">출제 기준 · 2026 대한피클볼협회 공식 피클볼 규정집 (ver3)<br>학습용 모의문항 · 풀이 기록과 메모는 이 브라우저에 저장됩니다.</div></footer>
 <dialog id="confirm"><h2 id="confirm-title"></h2><p id="confirm-copy"></p><form method="dialog" class="actions"><button class="btn" value="cancel" autofocus>취소</button><button class="btn primary" value="accept" id="confirm-button">제출하기</button></form></dialog>
@@ -214,6 +214,7 @@ function renderExam() {
   const q = questions[draft.ids[draft.index]];
   const total = draft.ids.length;
   const isRetry = view.id === "retry";
+  const checked = Boolean(draft.checked?.[q.id]);
   const progress = answered(draft.answers);
   return `<div class="exam-head">
     <div class="eyebrow">${isRetry ? "오답노트" : "전 범위 모의고사"}</div>
@@ -224,13 +225,14 @@ function renderExam() {
       <div class="eyebrow">${isRetry ? `${draft.index + 1} / ${total} · ${q.set}회차 ${q.number}번` : `${q.number}번 · ${q.options.length === 2 ? "O/X" : "4지선다"}`}</div>
       <h2 id="question" class="question-title" tabindex="-1">${esc(q.stem)}</h2>
       <div class="choices" role="group" aria-labelledby="question">${q.options.map((option, index) => `
-        <button class="choice" data-act="choose" data-value="${index}" aria-pressed="${draft.answers[q.id] === index}">
+        <button class="choice" ${checked ? "disabled" : ""} data-act="choose" data-value="${index}" aria-pressed="${draft.answers[q.id] === index}">
           <span class="choice-key" aria-hidden="true">${q.options.length === 2 ? ["O","X"][index] : labels[index]}</span><span>${esc(option)}</span>
         </button>`).join("")}</div>
+      ${checked ? `<div class="answer-feedback" tabindex="-1" id="feedback"><strong>${draft.answers[q.id] === q.answer ? "정답입니다." : "오답입니다."}</strong><p>내 답 · ${esc(displayAnswer(q, draft.answers[q.id]))}<br>정답 · ${esc(displayAnswer(q, q.answer))}</p><p>${esc(q.explanation)}</p><small>근거 · ${esc(q.rule)}</small></div>` : `<div class="answer-check">${button("정답 확인", "check", draft.answers[q.id] == null ? "disabled" : "")}<span>확인하면 이 문항의 답이 확정됩니다.</span></div>`}
       <div class="exam-actions">
         <div class="actions">${button("이전", "move", `data-step="-1" ${draft.index === 0 ? "disabled" : ""}`)}
         ${draft.index === total - 1 ? primary("제출하기", "submit") : primary("다음", "move", 'data-step="1"')}</div>
-        ${draft.answers[q.id] != null ? button("선택 해제", "clear") : ""}
+        ${!checked && draft.answers[q.id] != null ? button("선택 해제", "clear") : ""}
       </div>
     </section>
     <aside class="panel sidebar" aria-label="문항 탐색">
@@ -389,10 +391,21 @@ document.addEventListener("click", event => {
     case "notes": navigate({ type: "notes", filter: "open" }); break;
     case "start": start(Number(id)); break;
     case "last": navigate({ type: "results", id: Number(id), filter: "all" }); break;
+    case "check": {
+      const draft = getDraft();
+      const id = draft.ids[draft.index];
+      if (draft.answers[id] == null) break;
+      draft.checked ||= {};
+      draft.checked[id] = true;
+      save();
+      render("#feedback");
+      break;
+    }
     case "choose":
     case "clear": {
       const draft = getDraft();
       const qid = draft.ids[draft.index];
+      if (draft.checked?.[qid]) break;
       if (act === "clear") delete draft.answers[qid];
       else draft.answers[qid] = Number(value);
       save();
